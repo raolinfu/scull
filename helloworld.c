@@ -18,16 +18,17 @@ int scull_quantum = SCULL_QUANTUM;
 int scull_qset = SCULL_QSET;
 static int nums = 1;
 
-module_param(scull_major, int, S_IRUGO);
-module_param(scull_minor, int, S_IRUGO);
+/** module_param(scull_major, int, S_IRUGO);
+  * module_param(scull_minor, int, S_IRUGO); */
 struct scull_dev *scull_devices;	/* allocated in scull_init_module */
 
 loff_t scull_llseek(struct file * filp, loff_t off, int b){
 	return off;
 }
+
 // 读取操作
 static ssize_t scull_read(struct file *filp, char __user* buf, size_t count, loff_t *offp){
-	struct scull_dev *dev = filp->private_data; 
+	// struct scull_dev *dev = filp->private_data;
 	char str[20] = "hello world";
 	ssize_t retval = 0;
 
@@ -40,18 +41,19 @@ static ssize_t scull_read(struct file *filp, char __user* buf, size_t count, lof
 static ssize_t  scull_write(struct file *filp, const char __user *buf, size_t count, loff_t *offp){
 	struct scull_dev *dev = filp->private_data;
 	char *str = dev->buff;
-	ssize_t retval = -ENOMEM; /* value used in "goto out" statements */
+	ssize_t retval = -ENOMEM;
 
 	if (copy_from_user(str, buf, count)) {
 		retval = -EFAULT;
 	}
+	printk("data from user %s\n", buf);
 
 	return retval;
 }
 
 // 打开操作
 static int scull_open(struct inode *inode, struct file *filp){
-	struct scull_dev *dev; /* device information */
+	struct scull_dev *dev;
 
 	dev = container_of(inode->i_cdev, struct scull_dev, cdev);
 	filp->private_data = dev; /* for other methods */
@@ -80,7 +82,7 @@ static void scull_setup_cdev(struct scull_dev *dev, int index)
 	int err, devno = MKDEV(scull_major, scull_minor + index);
 	cdev_init(&dev->cdev, &scull_fops);
 	dev->cdev.owner = THIS_MODULE;
-	err = cdev_add (&dev->cdev, devno, 1);
+	err = cdev_add(&dev->cdev, devno, 1);
 
 	if (err)
 		printk(KERN_NOTICE "Error %d adding scull%d", err, index);
@@ -113,6 +115,7 @@ static int init_func(void)
 	for (i = 0; i < nums; i++) {
 		scull_setup_cdev(&scull_devices[i] , i);
 	}
+	printk("init driver finished\n");
 	return 0;
 }
 
@@ -129,7 +132,8 @@ static void exit_func(void)
 		}
 		kfree(scull_devices);
 	}
-	unregister_chrdev_region(devno, scull_nr_devs);
+	unregister_chrdev_region(devno, nums);
+	printk("clean up driver finished\n");
 }
 
 module_init(init_func);
