@@ -41,13 +41,11 @@ static ssize_t  scull_write(struct file *filp, const char __user *buf, size_t co
 	char *str = dev->buff;
 	ssize_t retval = -ENOMEM;
 
-	printk("write to raolinhu count:%lu\n", count);
-
 	if (copy_from_user(str, buf, count)) {
+		printk("copy to raolinhu wrong count:%lu\n", count);
 		retval = -EFAULT;
 	}
-	printk("format wrong\n");
-	printk("write to raolinhu:%s\n", buf);
+	printk("write to raolinhu:%s\n", str);
 
 	return retval;
 }
@@ -57,7 +55,7 @@ static int scull_open(struct inode *inode, struct file *filp){
 	struct scull_dev *dev;
 
 	dev = container_of(inode->i_cdev, struct scull_dev, cdev);
-	filp->private_data = dev; /* for other methods */
+	filp->private_data = dev;
 
 	if ( (filp->f_flags & O_ACCMODE) == O_WRONLY) {
 	}
