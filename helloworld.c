@@ -25,7 +25,6 @@ loff_t scull_llseek(struct file * filp, loff_t off, int b){
 
 // 读取操作
 static ssize_t scull_read(struct file *filp, char __user* buf, size_t count, loff_t *offp){
-	// struct scull_dev *dev = filp->private_data;
 	char str[20] = "hello world";
 	ssize_t retval = 0;
 
@@ -44,6 +43,7 @@ static ssize_t  scull_write(struct file *filp, const char __user *buf, size_t co
 	if (copy_from_user(str, buf, count)) {
 		printk("copy to raolinhu wrong count:%lu\n", count);
 		retval = -EFAULT;
+		return retval;
 	}
 	printk("write to raolinhu:%s\n", str);
 
