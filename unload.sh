@@ -1,5 +1,5 @@
 #!/bin/sh
-module="raolinhu"
+module="helloworld"
 device="raolinhu"
 
 # invoke rmmod with all arguments we got

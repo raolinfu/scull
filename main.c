@@ -8,21 +8,18 @@ int main()
 {
     int fd,i;
     char msg[101];
-    fd= open("/dev/chardev0",O_RDWR,S_IRUSR|S_IWUSR);
+	char hello[20] = "helloworld";
+    fd= open("/dev/raolinhu0",O_RDWR,S_IRUSR|S_IWUSR);
     if(fd!=-1)
     {
-        while(1)
-        {
-            for(i=0;i<101;i++)
-                msg[i]='\0';
-            read(fd,msg,100);
-            printf("%s\n",msg);
-            if(strcmp(msg,"quit")==0)
-            {
-                close(fd);
-                break;
-            }
-        }
+		/** for(i=0;i<101;i++)
+		  *     msg[i]='\0';
+		  * read(fd,msg,100);
+		  * printf("%s\n",msg); */
+		read(fd,msg,9);
+		printf("%s\n",msg);
+		write(fd, hello, strlen(hello));
+		close(fd);
     }
     else
     {

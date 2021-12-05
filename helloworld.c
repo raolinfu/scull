@@ -13,14 +13,11 @@
 
 int scull_major = SCULL_MAJOR;
 int scull_minor = 0;
-int scull_nr_devs = SCULL_NR_DEVS;	/* number of bare scull devices */
-int scull_quantum = SCULL_QUANTUM;
-int scull_qset = SCULL_QSET;
-static int nums = 1;
+static int nums = 1;		// 有多少设备
 
 /** module_param(scull_major, int, S_IRUGO);
   * module_param(scull_minor, int, S_IRUGO); */
-struct scull_dev *scull_devices;	/* allocated in scull_init_module */
+struct scull_dev *scull_devices;	/* 设备数组 */
 
 loff_t scull_llseek(struct file * filp, loff_t off, int b){
 	return off;
@@ -35,6 +32,7 @@ static ssize_t scull_read(struct file *filp, char __user* buf, size_t count, lof
 	if (copy_to_user(buf, str, count)) {
 		retval = -EFAULT;
 	}
+	printk("read from raolinhu\n");
 
 	return retval;
 }
@@ -43,10 +41,13 @@ static ssize_t  scull_write(struct file *filp, const char __user *buf, size_t co
 	char *str = dev->buff;
 	ssize_t retval = -ENOMEM;
 
+	printk("write to raolinhu count:%lu\n", count);
+
 	if (copy_from_user(str, buf, count)) {
 		retval = -EFAULT;
 	}
-	printk("data from user %s\n", buf);
+	printk("format wrong\n");
+	printk("write to raolinhu:%s\n", buf);
 
 	return retval;
 }
@@ -127,7 +128,7 @@ static void exit_func(void)
 
 	/* Get rid of our char dev entries */
 	if (scull_devices) {
-		for (i = 0; i < scull_nr_devs; i++) {
+		for (i = 0; i < nums; i++) {
 			cdev_del(&scull_devices[i].cdev);
 		}
 		kfree(scull_devices);
