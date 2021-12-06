@@ -1,4 +1,5 @@
 #include<linux/cdev.h>
+#include<linux/wait.h>
 #ifndef SCULL_MAJOR
 #define SCULL_MAJOR 0   /* dynamic major by default */
 #endif
@@ -18,6 +19,7 @@
 #define SCULL_QSET    1000
 #endif
 struct scull_dev {
+	wait_queue_head_t inq, outq;       /* read and write queues */
 	char buff[1000];
 	struct cdev cdev;
 };

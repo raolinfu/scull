@@ -1,4 +1,5 @@
 #include<linux/init.h>
+#include<linux/wait.h>
 #include<linux/slab.h>		/* kmalloc() */
 #include <linux/moduleparam.h>
 #include<linux/stat.h>
@@ -13,6 +14,7 @@
 
 int scull_major = SCULL_MAJOR;
 int scull_minor = 0;
+int flag = 0;
 static int nums = 1;		// 有多少设备
 
 /** module_param(scull_major, int, S_IRUGO);
@@ -25,8 +27,13 @@ loff_t scull_llseek(struct file * filp, loff_t off, int b){
 
 // 读取操作
 static ssize_t scull_read(struct file *filp, char __user* buf, size_t count, loff_t *offp){
-	char str[20] = "hello world";
+	struct scull_dev *dev = filp->private_data;
+	char *str = dev->buff;
+	// char str[20] = "hello world";
 	ssize_t retval = 0;
+	// 读进程休眠
+	wait_event_interruptible(dev->inq, flag != 0);
+	flag = 0;
 
 	if (copy_to_user(buf, str, count)) {
 		retval = -EFAULT;
@@ -46,7 +53,9 @@ static ssize_t  scull_write(struct file *filp, const char __user *buf, size_t co
 		return retval;
 	}
 	printk("write to raolinhu:%s\n", str);
-
+	// 写进程唤醒读进程
+	wake_up_interruptible(&dev->inq); 
+	flag = 1;
 	return retval;
 }
 
@@ -110,8 +119,10 @@ static int init_func(void)
 	}
 	memset(scull_devices, 0, nums * sizeof(struct scull_dev));
 
-	// 初始化每个设备
+	// 初始化每个设备 初始化等待队列
 	for (i = 0; i < nums; i++) {
+		init_waitqueue_head(&(scull_devices[i].inq));
+		init_waitqueue_head(&(scull_devices[i].outq));
 		scull_setup_cdev(&scull_devices[i] , i);
 	}
 	printk("init driver finished\n");
