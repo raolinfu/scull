@@ -77,7 +77,17 @@ long scull_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
     
 	if (_IOC_TYPE(cmd) != SCULL_IOC_MAGIC) return -ENOTTY;
 	if (_IOC_NR(cmd) > SCULL_IOC_MAXNR) return -ENOTTY;
+	switch(cmd) {
+		case TEST_CLEAR:
+			printk("clear ioctl\n");
+			break;
+		case TEST_OFFSET:
+			printk("offset ioctl\n");
+			break;
+		default:
+			return -ENOTTY;
 
+	}
 	return retval;
 }
 
