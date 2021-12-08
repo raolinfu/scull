@@ -19,7 +19,9 @@
 #define SCULL_QSET    1000
 #endif
 
-#define SCULL_IOC_MAGIC  'k'
+#define SCULL_IOC_MAGIC  'r'
+#define SCULL_IOC_MAXNR 14
+
 #define SCULL_IOCRESET    _IO(SCULL_IOC_MAGIC, 0)
 #define SCULL_IOCSQUANTUM _IOW(SCULL_IOC_MAGIC,  1, int)
 #define SCULL_IOCSQSET    _IOW(SCULL_IOC_MAGIC,  2, int)
@@ -35,7 +37,6 @@
 #define SCULL_IOCHQSET    _IO(SCULL_IOC_MAGIC,  12)
 #define SCULL_P_IOCTSIZE _IO(SCULL_IOC_MAGIC,   13)
 #define SCULL_P_IOCQSIZE _IO(SCULL_IOC_MAGIC,   14)
-#define SCULL_IOC_MAXNR 14
 
 struct scull_dev {
 	wait_queue_head_t inq, outq;       /* read and write queues */
