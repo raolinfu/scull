@@ -71,6 +71,16 @@ static int scull_open(struct inode *inode, struct file *filp){
 
 	return 0;
 }
+long scull_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+{
+	int retval = 0;
+    
+	if (_IOC_TYPE(cmd) != SCULL_IOC_MAGIC) return -ENOTTY;
+	if (_IOC_NR(cmd) > SCULL_IOC_MAXNR) return -ENOTTY;
+
+	return retval;
+}
+
 static int scull_release(struct inode *inode, struct file *filp){
 	return 0;
 }
@@ -81,6 +91,7 @@ struct file_operations scull_fops = {
 	.read = scull_read,
 	.write = scull_write,
 	.open = scull_open,
+	.unlocked_ioctl = scull_ioctl,
 	.release = scull_release,
 };
 
