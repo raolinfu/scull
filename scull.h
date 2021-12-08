@@ -22,8 +22,8 @@
 #define SCULL_IOC_MAGIC  'r'
 #define SCULL_IOC_MAXNR 14
 
-#define TEST_CLEAR _IO(SCULL_IOC_MAGIC, 0)
-#define TEST_OFFSET _IO(SCULL_IOC_MAGIC, 1)
+#define TEST_CLEAR _IO(SCULL_IOC_MAGIC, 1)
+#define TEST_OFFSET _IO(SCULL_IOC_MAGIC, 2)
 
 struct scull_dev {
 	wait_queue_head_t inq, outq;       /* read and write queues */
