@@ -56,7 +56,7 @@ static ssize_t  scull_write(struct file *filp, const char __user *buf, size_t co
 		retval = -EFAULT;
 		return retval;
 	}
-	write_offset = count;
+	write_offset = count > 100? 100: count;
 	printk("write to raolinhu:%s\n", str);
 	// 写进程唤醒读进程
 	wake_up_interruptible(&dev->inq); 
