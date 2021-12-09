@@ -15,6 +15,9 @@
 int scull_major = SCULL_MAJOR;
 int scull_minor = 0;
 int flag = 0;
+int write_offset = 0;
+int read_offset = 0;
+
 static int nums = 1;		// 有多少设备
 
 /** module_param(scull_major, int, S_IRUGO);
@@ -34,8 +37,9 @@ static ssize_t scull_read(struct file *filp, char __user* buf, size_t count, lof
 	// 读进程休眠
 	wait_event_interruptible(dev->inq, flag != 0);
 	flag = 0;
+	read_offset = write_offset > count? count: write_offset;
 
-	if (copy_to_user(buf, str, count)) {
+	if (copy_to_user(buf, str, read_offset)) {
 		retval = -EFAULT;
 	}
 	printk("read from raolinhu\n");
@@ -52,6 +56,7 @@ static ssize_t  scull_write(struct file *filp, const char __user *buf, size_t co
 		retval = -EFAULT;
 		return retval;
 	}
+	write_offset = count;
 	printk("write to raolinhu:%s\n", str);
 	// 写进程唤醒读进程
 	wake_up_interruptible(&dev->inq); 
