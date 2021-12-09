@@ -7,14 +7,15 @@
 int main()
 {
     int fd,i;
-    char msg[101];
 	char hello[20] = "helloworld\n";
     fd= open("/dev/raolinhu0",O_RDWR,S_IRUSR|S_IWUSR);
 	int flag = 1;
     if(fd!=-1)
     {
 		while(flag){
-			read(fd,msg,20);
+			char msg[101] = {0};
+			int cnt = read(fd,msg,20);
+			printf("cnt:%d\n",cnt);
 			printf("%s\n",msg);
 		}
 		close(fd);

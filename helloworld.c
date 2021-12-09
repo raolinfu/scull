@@ -38,6 +38,7 @@ static ssize_t scull_read(struct file *filp, char __user* buf, size_t count, lof
 	wait_event_interruptible(dev->inq, flag != 0);
 	flag = 0;
 	read_offset = write_offset > count? count: write_offset;
+	printk("read_offset raolinhu:%u\n", read_offset);
 
 	if (copy_to_user(buf, str, read_offset)) {
 		retval = -EFAULT;
@@ -50,13 +51,14 @@ static ssize_t  scull_write(struct file *filp, const char __user *buf, size_t co
 	struct scull_dev *dev = filp->private_data;
 	char *str = dev->buff;
 	ssize_t retval = -ENOMEM;
+	write_offset = count > 100? 100: count;
+	printk("write_offset raolinhu:%u\n", write_offset);
 
-	if (copy_from_user(str, buf, count)) {
+	if (copy_from_user(str, buf, write_offset)) {
 		printk("copy to raolinhu wrong count:%lu\n", count);
 		retval = -EFAULT;
 		return retval;
 	}
-	write_offset = count > 100? 100: count;
 	printk("write to raolinhu:%s\n", str);
 	// 写进程唤醒读进程
 	wake_up_interruptible(&dev->inq); 
