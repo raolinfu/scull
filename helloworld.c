@@ -1,4 +1,5 @@
 #include<linux/init.h>
+#include<linux/poll.h>
 #include<linux/wait.h>
 #include<linux/slab.h>		/* kmalloc() */
 #include <linux/moduleparam.h>
@@ -14,7 +15,7 @@
 
 int scull_major = SCULL_MAJOR;
 int scull_minor = 0;
-int flag = 0;
+int flag = 1;
 int write_offset = 0;
 int read_offset = 0;
 
@@ -26,6 +27,22 @@ struct scull_dev *scull_devices;	/* 设备数组 */
 
 loff_t scull_llseek(struct file * filp, loff_t off, int b){
 	return off;
+}
+
+static unsigned int scull_poll(struct file *filp, poll_table *wait)
+{
+	struct scull_dev *dev = filp->private_data;
+	unsigned int mask = 0;
+
+	// 如果等待队列inq状态变了 会再次调用scull_poll
+	// 其实是每次调用scull_poll时都注册一下等待队列 等待队列状态变化了又来
+	poll_wait(filp, &dev->inq,  wait);
+	// poll_wait(filp, &dev->outq, wait);
+	// mask |= POLLOUT | POLLWRNORM;	/* writable */
+	if(flag == 0)
+		mask |= POLLIN | POLLRDNORM;	/* readable */
+	printk("poll raolinhu\n");
+	return mask;
 }
 
 // 读取操作
@@ -106,6 +123,7 @@ struct file_operations scull_fops = {
 	.owner = THIS_MODULE,
 	.llseek = scull_llseek,
 	.read = scull_read,
+	.poll =	scull_poll,
 	.write = scull_write,
 	.open = scull_open,
 	.unlocked_ioctl = scull_ioctl,
