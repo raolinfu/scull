@@ -28,25 +28,27 @@ int main()
 	pfd.events = ( POLLIN | POLLRDNORM | POLLOUT | POLLWRNORM );
 
     while (1) {
+		char msg[101] = {0};
 		n = poll(&pfd, 1, -1);
+		int cnt = read(fd,msg,20);
+		printf("%s\n",msg);
     
 		if( ( pfd.revents & POLLIN )  == POLLIN )
 		{
 		  printf("Kernel_val POLLIN\n");
 		}
-		if( ( pfd.revents & POLLRDNORM )  == POLLRDNORM )
+		else if( ( pfd.revents & POLLRDNORM )  == POLLRDNORM )
 		{
 		  printf("Kernel_val POLLRDNORM\n");
 		}
-		if( ( pfd.revents & POLLOUT )  == POLLOUT )
+		else if( ( pfd.revents & POLLOUT )  == POLLOUT )
 		{
 		  printf("Kernel_val POLLOUT\n");
 		}
-		if( ( pfd.revents & POLLWRNORM )  == POLLWRNORM )
+		else if( ( pfd.revents & POLLWRNORM )  == POLLWRNORM )
 		{
 		  printf("Kernel_val POLLWRNORM\n");
 		}
-		sleep(1);
 
 	    printf("user poll\n"); 
 		if (n < 0)

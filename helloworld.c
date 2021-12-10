@@ -15,7 +15,7 @@
 
 int scull_major = SCULL_MAJOR;
 int scull_minor = 0;
-int flag = 1;
+int flag = 1; //表示可写
 int write_offset = 0;
 int read_offset = 0;
 
@@ -39,6 +39,7 @@ static unsigned int scull_poll(struct file *filp, poll_table *wait)
 	poll_wait(filp, &dev->inq,  wait);
 	// poll_wait(filp, &dev->outq, wait);
 	// mask |= POLLOUT | POLLWRNORM;	/* writable */
+	// flag == 0表示可读
 	if(flag == 0)
 		mask |= POLLIN | POLLRDNORM;	/* readable */
 	printk("poll raolinhu\n");
@@ -52,15 +53,19 @@ static ssize_t scull_read(struct file *filp, char __user* buf, size_t count, lof
 	// char str[20] = "hello world";
 	ssize_t retval = 0;
 	// 读进程休眠
-	wait_event_interruptible(dev->inq, flag != 0);
-	flag = 0;
+	wait_event_interruptible(dev->inq, flag == 0);
+
+	/** if (mutex_lock_interruptible(&dev->lock))
+	  *     return -ERESTARTSYS; */
+	mutex_lock(&dev->lock);
+	flag = 1;
 	read_offset = write_offset > count? count: write_offset;
-	printk("read_offset raolinhu:%u\n", read_offset);
 
 	if (copy_to_user(buf, str, read_offset)) {
 		retval = -EFAULT;
 	}
 	printk("read from raolinhu\n");
+	mutex_unlock(&dev->lock);
 
 	return retval;
 }
@@ -76,10 +81,13 @@ static ssize_t  scull_write(struct file *filp, const char __user *buf, size_t co
 		retval = -EFAULT;
 		return retval;
 	}
-	printk("write to raolinhu:%s\n", str);
+
+	mutex_lock(&dev->lock);
+	flag = 0;
 	// 写进程唤醒读进程
 	wake_up_interruptible(&dev->inq); 
-	flag = 1;
+	mutex_unlock(&dev->lock);
+
 	return retval;
 }
 
@@ -169,6 +177,7 @@ static int init_func(void)
 	for (i = 0; i < nums; i++) {
 		init_waitqueue_head(&(scull_devices[i].inq));
 		init_waitqueue_head(&(scull_devices[i].outq));
+		mutex_init(&scull_devices[i].lock);
 		scull_setup_cdev(&scull_devices[i] , i);
 	}
 	printk("init driver finished\n");

@@ -26,6 +26,7 @@
 #define TEST_OFFSET _IO(SCULL_IOC_MAGIC, 2)
 
 struct scull_dev {
+	struct mutex lock;     /* mutual exclusion semaphore     */
 	wait_queue_head_t inq, outq;       /* read and write queues */
 	char buff[1000];
 	struct cdev cdev;
